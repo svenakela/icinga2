@@ -31,7 +31,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     libnet-snmp-perl \
     locales \
     lsb-release \
-    mailutils \
+    bsd-mailx \
     mariadb-client \
     mariadb-server \
     netbase \
@@ -41,6 +41,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     php-ldap \
     php-mysql \
     php-mbstring \
+    php-gmp \
     procps \
     pwgen \
     snmp \
@@ -49,7 +50,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     supervisor \
     unzip \
     wget \
-    && apt-get --purge remove exim4 exim4-base exim4-config exim4-daemon-light \
+    && apt-get -y --purge remove exim4 exim4-base exim4-config exim4-daemon-light \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -83,11 +84,8 @@ ARG GITREF_IPL=v0.3.0
 RUN mkdir -p /usr/local/share/icingaweb2/modules/ \
     # Icinga Director
     && mkdir -p /usr/local/share/icingaweb2/modules/director/ \
-    && wget -q --no-cookies -O - "https://github.com/Icinga/icingaweb2-module-director/archive/v1.7.0.tar.gz" \
+    && wget -q --no-cookies -O - "https://github.com/Icinga/icingaweb2-module-director/archive/v1.7.2.tar.gz" \
     | tar xz --strip-components=1 --directory=/usr/local/share/icingaweb2/modules/director --exclude=.gitignore -f - \
-    # fix for https://github.com/Icinga/icingaweb2-module-director/issues/1993
-    && sed -i 's/change_time TIMESTAMP NOT NULL,/change_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,/' \
-    /usr/local/share/icingaweb2/modules/director/schema/mysql.sql \
     # Icingaweb2 Graphite
     && mkdir -p /usr/local/share/icingaweb2/modules/graphite \
     && wget -q --no-cookies -O - "https://github.com/Icinga/icingaweb2-module-graphite/archive/v1.1.0.tar.gz" \
@@ -111,6 +109,12 @@ RUN mkdir -p /usr/local/share/icingaweb2/modules/ \
     && mkdir -p /usr/local/share/icingaweb2/modules/ipl/ \
     && wget -q --no-cookies -O - "https://github.com/Icinga/icingaweb2-module-ipl/archive/v0.3.0.tar.gz" \
     | tar xz --strip-components=1 --directory=/usr/local/share/icingaweb2/modules/ipl -f - \
+    # Module x509
+    && mkdir -p /usr/local/share/icingaweb2/modules/x509/ \
+    && wget -q --no-cookies "https://github.com/Icinga/icingaweb2-module-x509/archive/v1.0.0.zip" \
+    && unzip -d /usr/local/share/icingaweb2/modules/x509 v1.0.0.zip \
+    && mv /usr/local/share/icingaweb2/modules/x509/icingaweb2-module-x509-1.0.0/* /usr/local/share/icingaweb2/modules/x509/ \
+    && rm -rf /usr/local/share/icingaweb2/modules/x509/icingaweb2-module-x509-1.0.0/ \
     && true
 
 ADD content/ /
